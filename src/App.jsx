@@ -205,7 +205,7 @@ export default function App() {
           {page === 'Explore' && <section className="panel explore-panel">
             <div className="explore-toolbar"><label className="search-box"><Search size={18} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t.search} aria-label={t.search} /><kbd>⌘ K</kbd></label><div className="filter-group" aria-label="Token filters"><Filter size={16} />{[['all', t.all], ['gainers', t.gainers], ['losers', t.losers]].map(([value, label]) => <button key={value} className={filter === value ? 'filter-active' : ''} onClick={() => setFilter(value)}>{label}</button>)}</div></div>
             <TokenTable t={t} tokens={filteredTokens} onSelect={openToken} watchlist={watched} onWatch={toggleWatch} />
-            {filteredTokens.length === 0 && <div className="empty-state"><Search size={28} /><strong>{t.empty}</strong><span>{t.emptyHint}</span><button className="button button-secondary" onClick={() => { setQuery(''); setFilter('all'); }}>{t.retry}</button></div>}
+
           </section>}
           {page === 'Create Token' && <div className="content-grid create-grid">
             <section className="panel form-panel"><div className="panel-heading"><div><span className="eyebrow">TOKEN STUDIO</span><h2>{t.idea}</h2><p>{t.createSub}</p></div><span className="icon-bubble"><PlusCircle size={20} /></span></div>
