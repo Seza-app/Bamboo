@@ -20,12 +20,13 @@ npm run preview
 
 ## Included prototype interactions
 
-- Search tokens and filter gainers/losers.
-- Open token details from market tables and mover lists.
-- Preview token creation locally.
-- Review simulated buy/sell order details and record demo activity.
-- Save a watchlist, language preference, and notification preference in browser local storage.
+- Search tokens by name, ticker, or category; filter gainers and losers. Use Ctrl/⌘ + K to open Explore and focus search.
+- Open token details from market tables and mover lists, then carry the same selection into the trade ticket.
+- Preview token creation locally with symbol validation and duplicate-symbol checks.
+- Review simulated buy/sell order details, see a recording state, and save demo activity locally.
+- Save watchlist, language, notification preference, selected token, token preview, order history, and chart range in browser local storage.
 - Switch the interface language between English, French, and Haitian Creole.
+- Change illustrative chart ranges (1D, 1W, 1M, 3M, 1Y, ALL); token charts reflect the selected token's simulated change direction.
 - Responsive desktop sidebar and mobile bottom navigation.
 
 ## Production limitations
