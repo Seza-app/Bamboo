@@ -92,6 +92,7 @@ export default function App() {
   const [tradeSide, setTradeSide] = useState('buy');
   const [tradeAmount, setTradeAmount] = useState('250');
   const [orderReview, setOrderReview] = useState(false);
+  const [orderSaving, setOrderSaving] = useState(false);
   const [toast, setToast] = useState('');
   const [error, setError] = useState('');
   const [orders, setOrders] = useState([
@@ -114,6 +115,7 @@ export default function App() {
   });
 
   useEffect(() => { setPref('language', language); }, [language]);
+  useEffect(() => { document.documentElement.lang = language; }, [language]);
   useEffect(() => { setPref('notifications', notifications); }, [notifications]);
   useEffect(() => { setPref('watchlist', watched); }, [watched]);
 
@@ -142,12 +144,17 @@ export default function App() {
     setOrderReview(true);
   };
   const confirmTrade = () => {
+    if (orderSaving) return;
     const amount = Number(tradeAmount);
-    const item = { id: 'DEMO-' + Date.now().toString().slice(-6), side: tradeSide, token: selectedToken.symbol, amount, status: 'Demo only', time: new Date().toLocaleString() };
-    setOrders((current) => [item, ...current]);
-    setOrderReview(false);
-    notify(t.orderSuccess);
-    setPage('Activity');
+    setOrderSaving(true);
+    window.setTimeout(() => {
+      const item = { id: 'DEMO-' + Date.now().toString().slice(-6), side: tradeSide, token: selectedToken.symbol, amount, status: 'Demo only', time: new Date().toLocaleString() };
+      setOrders((current) => [item, ...current]);
+      setOrderSaving(false);
+      setOrderReview(false);
+      notify(t.orderSuccess);
+      setPage('Activity');
+    }, 450);
   };
   const watchlistTokens = tokens.filter((token) => watched.includes(token.id));
 
@@ -190,7 +197,7 @@ export default function App() {
 
           <div className="demo-banner"><ShieldCheck size={18} /><div><strong>{t.demo}</strong><span>{t.demoText}</span></div></div>
 
-          {page === 'Overview' && <Overview t={t} tokens={tokens} openToken={openToken} go={go} />}
+          {page === 'Overview' && <Overview t={t} tokens={tokens} openToken={openToken} go={go} watched={watched} toggleWatch={toggleWatch} />}
           {page === 'Explore' && <section className="panel explore-panel">
             <div className="explore-toolbar"><label className="search-box"><Search size={18} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t.search} aria-label={t.search} /><kbd>⌘ K</kbd></label><div className="filter-group" aria-label="Token filters"><Filter size={16} />{[['all', t.all], ['gainers', t.gainers], ['losers', t.losers]].map(([value, label]) => <button key={value} className={filter === value ? 'filter-active' : ''} onClick={() => setFilter(value)}>{label}</button>)}</div></div>
             <TokenTable t={t} tokens={filteredTokens} onSelect={openToken} watchlist={watched} onWatch={toggleWatch} />
@@ -221,15 +228,15 @@ export default function App() {
         <footer className="app-footer"><span>© 2026 BAMBOO</span><span><span className="footer-dot" /> {t.footer}</span><strong>{t.tagline}</strong></footer>
       </main>
       <nav className="mobile-nav" aria-label="Mobile navigation">{[['Overview', LayoutDashboard, t.overview], ['Explore', Compass, t.explore], ['Create Token', PlusCircle, t.create], ['Portfolio', Wallet, t.portfolio], ['Profile', UserRound, t.profile]].map(([name, Icon, label]) => <button key={name} className={page === name || (name === 'Explore' && page === 'Token Details') ? 'mobile-active' : ''} onClick={() => go(name)}><Icon size={19} /><small>{label}</small></button>)}</nav>
-      {orderReview && <div className="modal-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) setOrderReview(false); }}><section className="order-modal" role="dialog" aria-modal="true" aria-labelledby="order-modal-title"><button className="icon-button modal-close" onClick={() => setOrderReview(false)} aria-label={t.close}><X size={18} /></button><span className="modal-symbol">{selectedToken.emoji}</span><span className="eyebrow">{t.review}</span><h2 id="order-modal-title">{t.orderSummary}</h2><div className="modal-order-line"><span>{t.side}</span><strong className={tradeSide === 'buy' ? 'positive' : 'negative'}>{tradeSide === 'buy' ? t.buy : t.sell} {selectedToken.symbol}</strong></div><div className="modal-order-line"><span>{t.estimatedPrice}</span><strong>{money(selectedToken.price)}</strong></div><div className="modal-order-line"><span>{t.estimatedTotal}</span><strong>{money(Number(tradeAmount))}</strong></div><div className="modal-disclaimer"><ShieldCheck size={17} />{t.noWallet}</div><button className="button button-primary button-wide" onClick={confirmTrade}>{t.confirmDemo} <Check size={17} /></button><button className="button button-ghost button-wide" onClick={() => setOrderReview(false)}>{t.cancel}</button></section></div>}
+      {orderReview && <div className="modal-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) setOrderReview(false); }}><section className="order-modal" role="dialog" aria-modal="true" aria-labelledby="order-modal-title"><button className="icon-button modal-close" onClick={() => setOrderReview(false)} aria-label={t.close}><X size={18} /></button><span className="modal-symbol">{selectedToken.emoji}</span><span className="eyebrow">{t.review}</span><h2 id="order-modal-title">{t.orderSummary}</h2><div className="modal-order-line"><span>{t.side}</span><strong className={tradeSide === 'buy' ? 'positive' : 'negative'}>{tradeSide === 'buy' ? t.buy : t.sell} {selectedToken.symbol}</strong></div><div className="modal-order-line"><span>{t.estimatedPrice}</span><strong>{money(selectedToken.price)}</strong></div><div className="modal-order-line"><span>{t.estimatedTotal}</span><strong>{money(Number(tradeAmount))}</strong></div><div className="modal-disclaimer"><ShieldCheck size={17} />{t.noWallet}</div><button className="button button-primary button-wide" onClick={confirmTrade} disabled={orderSaving}>{orderSaving ? t.loading : t.confirmDemo} {orderSaving ? <Activity size={17} className="loading-icon" /> : <Check size={17} />}</button><button className="button button-ghost button-wide" onClick={() => setOrderReview(false)}>{t.cancel}</button></section></div>}
       {toast && <div className="toast" role="status"><Check size={17} />{toast}<button className="icon-button" aria-label={t.close} onClick={() => setToast('')}><X size={15} /></button></div>}
     </div>
   );
 }
 
-function Overview({ t, tokens, openToken, go }) {
+function Overview({ t, tokens, openToken, go, watched, toggleWatch }) {
   const stats = [[t.statsPortfolio, '$12,840.56', '+8.42%', Wallet], [t.volume, '$2.48M', '+12.6%', Activity], [t.discovered, '1,284', '+36 this week', Compass], [t.members, '24.8K', '+5.2%', Trophy]];
-  return <><section className="hero-banner"><div className="hero-copy"><span className="hero-kicker"><Sparkles size={14} /> GROW WITH THE COMMUNITY</span><h2>Big ideas start<br />with a <em>little green.</em></h2><p>Create something meaningful. Discover what’s growing. Be part of the next wave.</p><div className="hero-actions"><button className="button button-primary" onClick={() => go('Explore')}>{t.exploreCta} <ArrowUpRight size={16} /></button><button className="button button-secondary" onClick={() => go('Learn')}>{t.how} <ArrowRight size={16} /></button></div></div><div className="hero-plant" aria-hidden="true"><div className="plant-ring ring-one" /><div className="plant-ring ring-two" /><span>🎋</span></div><div className="hero-footer"><span><span className="footer-dot" /> Community is growing</span><strong>{t.tagline}</strong></div></section><div className="stats-grid">{stats.map(([label, value, delta, Icon]) => <StatCard key={label} label={label} value={value} delta={delta} Icon={Icon} />)}</div><div className="content-grid overview-grid"><section className="panel chart-panel"><PanelHeading title={t.performance} subtitle={t.simulatedAssets} action={t.viewPortfolio} onAction={() => go('Portfolio')} /><div className="chart-balance"><div><small>{t.totalValue}</small><strong>$12,840.56</strong></div><span className="positive"><TrendingUp size={15} /> 8.42%</span></div><PerformanceChart /></section><section className="panel movers-panel"><PanelHeading title={t.topMovers} subtitle={t.today} action={t.viewAll} onAction={() => go('Explore')} />{tokens.slice(0, 4).map((token) => <button className="mover-row" key={token.id} onClick={() => openToken(token)}><TokenIcon token={token} /><span className="mover-copy"><strong>{token.name}</strong><small>{token.symbol}</small></span><span className="mover-price"><strong>{money(token.price)}</strong><small className={token.change < 0 ? 'negative' : 'positive'}>{token.change > 0 ? '+' : ''}{token.change.toFixed(2)}%</small></span><ChevronRight size={16} /></button>)}</section></div><section className="panel table-panel"><PanelHeading title={t.market} subtitle={t.marketSub} action={t.viewAll} onAction={() => go('Explore')} /><TokenTable t={t} tokens={tokens.slice(0, 5)} onSelect={openToken} watchlist={[]} onWatch={() => {}} /></section></>;
+  return <><section className="hero-banner"><div className="hero-copy"><span className="hero-kicker"><Sparkles size={14} /> GROW WITH THE COMMUNITY</span><h2>Big ideas start<br />with a <em>little green.</em></h2><p>Create something meaningful. Discover what’s growing. Be part of the next wave.</p><div className="hero-actions"><button className="button button-primary" onClick={() => go('Explore')}>{t.exploreCta} <ArrowUpRight size={16} /></button><button className="button button-secondary" onClick={() => go('Learn')}>{t.how} <ArrowRight size={16} /></button></div></div><div className="hero-plant" aria-hidden="true"><div className="plant-ring ring-one" /><div className="plant-ring ring-two" /><span>🎋</span></div><div className="hero-footer"><span><span className="footer-dot" /> Community is growing</span><strong>{t.tagline}</strong></div></section><div className="stats-grid">{stats.map(([label, value, delta, Icon]) => <StatCard key={label} label={label} value={value} delta={delta} Icon={Icon} />)}</div><div className="content-grid overview-grid"><section className="panel chart-panel"><PanelHeading title={t.performance} subtitle={t.simulatedAssets} action={t.viewPortfolio} onAction={() => go('Portfolio')} /><div className="chart-balance"><div><small>{t.totalValue}</small><strong>$12,840.56</strong></div><span className="positive"><TrendingUp size={15} /> 8.42%</span></div><PerformanceChart /></section><section className="panel movers-panel"><PanelHeading title={t.topMovers} subtitle={t.today} action={t.viewAll} onAction={() => go('Explore')} />{tokens.slice(0, 4).map((token) => <button className="mover-row" key={token.id} onClick={() => openToken(token)}><TokenIcon token={token} /><span className="mover-copy"><strong>{token.name}</strong><small>{token.symbol}</small></span><span className="mover-price"><strong>{money(token.price)}</strong><small className={token.change < 0 ? 'negative' : 'positive'}>{token.change > 0 ? '+' : ''}{token.change.toFixed(2)}%</small></span><ChevronRight size={16} /></button>)}</section></div><section className="panel table-panel"><PanelHeading title={t.market} subtitle={t.marketSub} action={t.viewAll} onAction={() => go('Explore')} /><TokenTable t={t} tokens={tokens.slice(0, 5)} onSelect={openToken} watchlist={watched} onWatch={toggleWatch} /></section></>;
 }
 
 function StatCard({ label, value, delta, Icon, negative = false }) {
