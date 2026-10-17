@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Activity, ArrowDownLeft, ArrowLeftRight, ArrowRight, ArrowUpRight, Bell, BookOpen,
-  Check, ChevronDown, ChevronRight, CircleHelp, Compass, Copy, ExternalLink, Eye,
-  EyeOff, Filter, Globe2, LayoutDashboard, Leaf, Menu, Plus, PlusCircle, Search,
+  Check, ChevronDown, ChevronRight, CircleHelp, Compass, Copy, Eye,
+  Filter, Globe2, LayoutDashboard, Leaf, Menu, Plus, PlusCircle, Search,
   Settings2, ShieldCheck, Sparkles, TrendingDown, TrendingUp, Trophy, UserRound,
   Wallet, X, Zap
 } from 'lucide-react';
